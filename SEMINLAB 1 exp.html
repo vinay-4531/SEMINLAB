@@ -1,0 +1,113 @@
+
+import React, { useState } from "react";
+
+const events = [
+  { date: "2025-10-05", title: "Meeting", description: "Project meeting at 10 AM" },
+  { date: "2025-10-12", title: "Doctor Appointment", description: "Visit Dr. Smith at 3 PM" },
+  { date: "2025-10-12", title: "Lunch with Sarah", description: "At the new cafe downtown" },
+  { date: "2025-10-23", title: "Conference", description: "Tech conference all day" },
+];
+
+function InteractiveCalendar() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-based
+
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  // Get the first day of the month (0=Sunday)
+  const firstDay = new Date(year, month, 1).getDay();
+  // Get number of days in the month
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Generate array of dates to render in calendar grid
+  // We'll start from Sunday before the 1st (or the 1st itself)
+  const calendarDays = [];
+
+  // Fill empty slots before the first day of month
+  for (let i = 0; i < firstDay; i++) {
+    calendarDays.push(null);
+  }
+  // Fill days of month
+  for (let day = 1; day <= daysInMonth; day++) {
+    calendarDays.push(day);
+  }
+
+  // Format date to YYYY-MM-DD for event matching
+  function formatDate(day) {
+    if (!day) return null;
+    const m = month + 1 < 10 ? `0${month + 1}` : month + 1;
+    const d = day < 10 ? `0${day}` : day;
+    return `${year}-${m}-${d}`;
+  }
+
+  // Filter events for selected date
+  const selectedEvents = selectedDate
+    ? events.filter((e) => e.date === selectedDate)
+    : [];
+
+  return (
+    <div style={{ maxWidth: 400, margin: "20px auto", fontFamily: "Arial, sans-serif" }}>
+      <h2>
+        {today.toLocaleString("default", { month: "long" })} {year}
+      </h2>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: 5,
+          textAlign: "center",
+          marginBottom: 10,
+        }}
+      >
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+          <div key={d} style={{ fontWeight: "bold" }}>
+            {d}
+          </div>
+        ))}
+        {calendarDays.map((day, idx) => {
+          const dateStr = formatDate(day);
+          const isSelected = dateStr === selectedDate;
+          return (
+            <div
+              key={idx}
+              onClick={() => day && setSelectedDate(dateStr)}
+              style={{
+                padding: 10,
+                borderRadius: 4,
+                cursor: day ? "pointer" : "default",
+                backgroundColor: isSelected ? "#007bff" : "#f0f0f0",
+                color: isSelected ? "white" : day ? "black" : "#ccc",
+                userSelect: "none",
+              }}
+            >
+              {day || ""}
+            </div>
+          );
+        })}
+      </div>
+
+      {selectedDate ? (
+        <div>
+          <h3>Events on {selectedDate}</h3>
+          {selectedEvents.length === 0 ? (
+            <p>No events for this date.</p>
+          ) : (
+            <ul>
+              {selectedEvents.map((ev, i) => (
+                <li key={i} style={{ marginBottom: 10 }}>
+                  <strong>{ev.title}</strong>
+                  <p style={{ margin: 0 }}>{ev.description}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <p>Select a date to see events.</p>
+      )}
+    </div>
+  );
+}
+
+export default InteractiveCalendar;
